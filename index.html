@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dropbox JSON 편집기</title>
+    <style>
+        body {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: 0 20px;
+            font-family: Arial, sans-serif;
+        }
+        .agent-container {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-top: 10px;
+            border-radius: 5px;
+        }
+        .agent-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        input, select {
+            width: 100%;
+            padding: 5px;
+            border: 1px solid #ccc;
+        }
+        button {
+            margin: 5px;
+            padding: 5px 15px;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+        }
+        .toggle-btn-true {
+            background-color: #4CAF50; /* 초록색 */
+            color: white;
+        }
+        .toggle-btn-false {
+            background-color: #E74C3C; /* 빨간색 */
+            color: white;
+        }
+        .updated-container {
+			display: flex;
+			align-items: center;
+			margin: 15px 0;
+			padding: 10px;
+			width: fit-content;
+		}
+		.toggle-btn {
+			font-size: 16px;
+			font-weight: bold;
+			padding: 10px 20px;
+			border: none;
+			border-radius: 5px;
+			cursor: pointer;
+			transition: background-color 0.3s ease;
+		}
+		.toggle-true {
+			background-color: #4CAF50; /* 초록색 */
+			color: white;
+		}
+		.toggle-false {
+			background-color: #E74C3C; /* 빨간색 */
+			color: white;
+		}
+    </style>	
+</head>
+<body>
+    <h1>Dropbox JSON 편집기</h1>
+    <button onclick="loadJSON()">JSON 불러오기</button>
+    <button onclick="saveJSON()">JSON 저장하기</button>
+
+    <div class="updated-container">
+		<button id="updatedToggle" class="toggle-btn" onclick="toggleUpdated()">updated: False</button>
+	</div>
+
+    <div id="agentsContainer"></div>
+
+    <script>
+        const ACCESS_TOKEN = "sl.u.AFglVAScsWhLJBGwmbgX4zKhwv59yGg-p-wrDrPEyxWo7NMZYKRYcr6zPDzzcYnH-cKlGbnsImfa0a4Kyt5bnGBj5-POlGpKFJWGGzxLZE_o6dDv5B97oyoo1R_p4uCBv15eAcM6ol6UX2SJLsfOMpM8ppovc3grPKCE_MSr2jz54xMVLNygaHE6LgwJ6pWxSIwUqszqlt1ZM2lUJj0ha7h-kIUcvB82rmPWFDPz2uZZWteZIb_aLQJTMHz8L4rkMWThk_TaYhuPg9kjbyonkoCDp1LA_J7bsXTjJ2iMbCAKjVGVzwJqNZXX3BErVKAhtZ-q2raTdmgbAF-rGjtSyLtq9UY-aMJ24-43A7QMyw6mX0g1W-2Ln1gxVMUw1Xnz37kpxR7DiYPfRAt-4Nzmz-Xq83EXRXqone0meahN8Klo4s2N6hO8927QQpEiqfnpcEEqIYyN_2vssUgy0esxcqzBpgXyNG3HsqS9z3aXGXQLhnQ0NYUEauL2Mgt0I42a_7Hla_QjwKgSgm0TQOAWXq4EXybMR5pWRdJAyKqrC7V4j0biU3-ud1LKbGT1ORuDEjKlwnef4turZ7UbUYgo8TbeZGvk80D1tuBXzidMb2MerK_fC-6chDfGLoRidMS9ynaTPSjf5NMjTLru2m6vuIigkmWVBooQLWUnscmXlhYLnIo3uyNbIspNapPTxf-QBlunSqrSdbGXrDfzBPPPvu5DuQN0J0dKLIjGHiZZYBX3TH7h1ZT0rmCGPFh7rBGUiwkNOWe4AkuB4WbCTZoN2arNkBSxdai9X3mjp3FjncLtTxM1fOPcfmpym1YvY-FHqabAKJQUquCutD0g94ucTR-jay1wTWsW8pmovMQGhGSGRDIy7ut5vGUSmkmocC4Yw6x4aTasBDtzL8Oq_Naqs587ZuICqrXj1eJQF81k7P3U67FO6mBLeDnXsjjdGFawYLx6iCB5kCIn-QJd8GdelqrI7E5ZeFA2UXo3K5WWJYqxs7cR55hDmiNPU1fTHz7VzNlS9En1cuY32VKJiIilRKkO6dTNT1te4QfkQ1iYH9FIY7SDFVIdnsuCf1XYLIHjQCTMJUMjo1J8CgND7DGEY7ZTt5z4aqG1cOGhCQ93ygFZiKc5eGDyO6r98CSp2Vt62HsBywdCnMotd7S0CXE8HMwC7wf7fZ6na_bF4mCw6RMIS6sHEp1MgTMBFNbbbFZPH-yFqm_G7smNjROR6it2tWiOdWJkGV86uDrK2-YNcXI9kK2ex8lG0rCCr32IpudkA275X1hLVudw-RlUTorhU35f"; // ?? 생성한 Access Token 입력
+        const FILE_PATH = "/agent_data.json"; // ?? Dropbox 내 JSON 파일 경로
+
+        let jsonData = {}; // 현재 JSON 데이터를 저장할 객체
+
+        // ?? JSON 데이터를 화면에 표시
+        function renderUI() {
+			const container = document.getElementById("agentsContainer");
+			container.innerHTML = ""; // 기존 UI 초기화
+
+			// updated 토글 UI 업데이트
+			updateUpdatedUI();
+
+			// Agents 데이터 테이블 생성
+			Object.keys(jsonData.agents).forEach(agentKey => {
+				const agentData = jsonData.agents[agentKey];
+
+				const agentDiv = document.createElement("div");
+				agentDiv.classList.add("agent-container");
+
+				const agentTitle = document.createElement("div");
+				agentTitle.classList.add("agent-title");
+				agentTitle.textContent = `?? ${agentKey.replace(/_/g, " ")}`; // "_" 제거하여 표시
+				agentDiv.appendChild(agentTitle);
+
+				const table = document.createElement("table");
+				const tbody = document.createElement("tbody");
+
+				Object.keys(agentData).forEach(key => {
+					const row = document.createElement("tr");
+
+					const keyCell = document.createElement("td");
+					keyCell.textContent = key;
+					row.appendChild(keyCell);
+
+					const valueCell = document.createElement("td");
+
+					if (typeof agentData[key] === "boolean") {
+						// Boolean 값이면 버튼 추가하여 토글 기능 제공
+						const button = document.createElement("button");
+						button.classList.add(agentData[key] ? "toggle-btn-true" : "toggle-btn-false");
+						button.textContent = agentData[key] ? "? True" : "? False";
+						button.dataset.agent = agentKey;
+						button.dataset.key = key;
+						button.onclick = toggleBooleanValue;
+						valueCell.appendChild(button);
+					} else if (Array.isArray(agentData[key])) {
+						// 배열인 경우 리스트로 표시
+						const list = document.createElement("ul");
+						agentData[key].forEach(value => {
+							const listItem = document.createElement("li");
+							listItem.textContent = value;
+							list.appendChild(listItem);
+						});
+						valueCell.appendChild(list);
+					} else {
+						// 일반 값은 input 필드로 표시
+						const input = document.createElement("input");
+						input.value = agentData[key];
+						input.dataset.agent = agentKey;
+						input.dataset.key = key;
+						input.addEventListener("input", updateAgentValue);
+						valueCell.appendChild(input);
+					}
+
+					row.appendChild(valueCell);
+					tbody.appendChild(row);
+				});
+
+				table.appendChild(tbody);
+				agentDiv.appendChild(table);
+				container.appendChild(agentDiv);
+			});
+		}
+
+		function toggleUpdated() {
+			jsonData.updated = !jsonData.updated;
+			updateUpdatedUI();
+		}
+
+		function updateUpdatedUI() {
+			const btn = document.getElementById("updatedToggle");
+			btn.textContent = jsonData.updated ? "updated: True" : "updated: False";
+			btn.classList.toggle("toggle-true", jsonData.updated);
+			btn.classList.toggle("toggle-false", !jsonData.updated);
+		}
+
+        // ?? 사용자가 입력한 데이터를 JSON 객체에 반영 (숫자는 float로 변환)
+		function updateAgentValue(event) {
+			const agent = event.target.dataset.agent;
+			const key = event.target.dataset.key;
+			let value = event.target.value;
+
+			// 숫자인 경우 float 변환 (단, 날짜 포맷이 아닌 경우)
+			if (!isNaN(value) && value.trim() !== "" && !/\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(value)) {
+				value = value.includes(".") ? parseFloat(value) : parseInt(value);
+			}
+
+			jsonData.agents[agent][key] = value;
+		}
+
+        // ?? Boolean 값을 토글하는 기능
+        function toggleBooleanValue(event) {
+            const agent = event.target.dataset.agent;
+            const key = event.target.dataset.key;
+            jsonData.agents[agent][key] = !jsonData.agents[agent][key]; // 값 반전
+
+            // UI 업데이트
+            event.target.textContent = jsonData.agents[agent][key] ? "? True" : "? False";
+            event.target.classList.toggle("toggle-btn-true", jsonData.agents[agent][key]);
+            event.target.classList.toggle("toggle-btn-false", !jsonData.agents[agent][key]);
+        }
+
+        // ?? Dropbox에서 JSON 불러오기
+		async function loadJSON() {
+			try {
+				const response = await fetch("https://www.dropbox.com/scl/fi/vqjpkiwladti4s32nk02p/agent_data.json?rlkey=1i783c2jzdjxoqbx73gzuu6wf&st=ei49tp54&dl=1");
+				if (!response.ok) throw new Error("파일을 불러올 수 없음");
+
+				jsonData = await response.json();
+				renderUI(); // UI 업데이트
+				updateUpdatedUI(); // updated 버튼 상태 업데이트
+
+				alert("JSON 데이터를 성공적으로 불러왔습니다!");
+			} catch (error) {
+				console.error(error);
+				alert("JSON 불러오기 실패: " + error.message);
+			}
+		}
+
+        // ?? Dropbox에 JSON 저장하기
+        async function saveJSON() {
+            try {
+                const response = await fetch("https://content.dropboxapi.com/2/files/upload", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${ACCESS_TOKEN}`,
+                        "Content-Type": "application/octet-stream",
+                        "Dropbox-API-Arg": JSON.stringify({
+                            path: FILE_PATH,
+                            mode: "overwrite"
+                        })
+                    },
+                    body: JSON.stringify(jsonData, null, 2)
+                });
+
+                if (!response.ok) throw new Error("파일 저장 실패");
+
+                alert("JSON 저장 성공!");
+            } catch (error) {
+                console.error(error);
+                alert("JSON 저장 실패: " + error.message);
+            }
+        }
+    </script>
+</body>
+</html>
